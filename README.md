@@ -16,7 +16,7 @@
 
 - Qt制作云盘客户端 （实现文件上传、下载、删除、分享功能）
 
-  <img src="C:\Users\ZYY\Desktop\cpplearn\github_code\project\cloud-disk\README.assets\image-20230721142156706.png" alt="image-20230721142156706" style="zoom: 67%;" />
+  ![image-20230721200700748](README.assets/image-20230721200700748.png)
 
 - 服务端：
   - **nginx**作为代理服务器，转发客户端请求给后台FastCGI进行处理
@@ -147,7 +147,7 @@ sudo nginx -t
 ps aux | grep nginx
 ```
 
-<img src="C:\Users\ZYY\Desktop\cpplearn\github_code\project\cloud-disk\README.assets\image-20230721151207505.png" alt="image-20230721151207505" style="zoom:67%;" />
+![image-20230721200645480](README.assets/image-20230721200645480.png)
 
 - 配置文件 nginx.conf
 
@@ -268,7 +268,7 @@ http {
 
     求都是直接发送给反向代理服务器，然后由反向代理服务器统一调配。
 
-<img src="C:\Users\ZYY\Desktop\cpplearn\github_code\project\cloud-disk\README.assets\image-20230721152352285.png" alt="image-20230721152352285" style="zoom:50%;" />
+![image-20230721200724395](README.assets/image-20230721200724395.png)
 
 - 以代理服务器来接受Internet上的连接请求。
 - 将请求转发给内部网络上的服务器。
@@ -285,7 +285,7 @@ http {
 
   - 反向代理设置
 
-    ![image-20230721153049447](C:\Users\ZYY\Desktop\cpplearn\github_code\project\cloud-disk\README.assets\image-20230721153049447.png)
+    ![image-20230721201254080](README.assets/image-20230721201254080.png)
 
   - 负载均衡设置
 
@@ -293,7 +293,7 @@ http {
     - **使用轮询的方式**
     - **分配权重 weight**    指定轮询几率，weight和访问比率成正比，用于后端服务器性能不均的情况
 
-    ![image-20230721153158271](C:\Users\ZYY\Desktop\cpplearn\github_code\project\cloud-disk\README.assets\image-20230721153158271.png)
+    ![image-20230721201305616](README.assets/image-20230721201305616.png)
 
 
 
@@ -306,7 +306,7 @@ http {
 - CGI ： **通用网关接口**（**C**ommon **G**ateway **I**nterface/**CGI**）**描述了客户端和服务器程序之间传输数据的一种标准**，
 
 - CGI处理流程：
-  - <img src="C:\Users\ZYY\Desktop\cpplearn\github_code\project\cloud-disk\README.assets\image-20230721154401710.png" alt="image-20230721154401710" style="zoom:80%;" />
+  - ![image-20230721201315761](README.assets/image-20230721201315761.png)
 
 >1.客户端向服务器发送请求，通过url
 >
@@ -330,7 +330,7 @@ http {
 
   - 牛客网，网页客户端将数据当做输入传递给后端的cgi程序，cgi程序处理完成之后将结果作为输出返回给客户端
 
-    <img src="C:\Users\ZYY\Desktop\cpplearn\github_code\project\cloud-disk\README.assets\image-20230721160015890.png" alt="image-20230721160015890" style="zoom:50%;" />
+    ![image-20230721201323367](README.assets/image-20230721201323367.png)
 
   - **cgi与server进程的区别：**cgi使用输入输出与客户端进行交互，但是server使用的是http等协议与客户端进行交互
 
@@ -353,7 +353,7 @@ http {
 
   ------
 
-  <img src="C:\Users\ZYY\Desktop\cpplearn\github_code\project\cloud-disk\README.assets\image-20230721161236198.png" alt="image-20230721161236198" style="zoom:67%;" />
+  ![image-20230721201330596](README.assets/image-20230721201330596.png)
 
 - fastcgi处理流程
 
@@ -366,7 +366,7 @@ http {
 
 - 安装
 
-  - ![image-20230721162139512](C:\Users\ZYY\Desktop\cpplearn\github_code\project\cloud-disk\README.assets\image-20230721162139512.png)
+  - ![image-20230721201339777](README.assets/image-20230721201339777.png)
 
 ### 2. ngx_http_fastcgi_module模块
 
@@ -377,11 +377,11 @@ http {
   Web浏览器通过HTTP请求将数据发送给Nginx，但是Nginx的数据都是HTTP格式的，那么FastCGI如何处理这些数据呢？
   此时ngx_http_fastcgi_module模块会将Nginx的HTTP协议转换为fastcgi协议，然后将数据转发给FastCGI程序进行处理
 
-<img src="C:\Users\ZYY\Desktop\cpplearn\github_code\project\cloud-disk\README.assets\image-20230721162751074.png" alt="image-20230721162751074" style="zoom:50%;" />
+![image-20230721201346464](README.assets/image-20230721201346464.png)
 
 - 在nginx.conf中配置
 
-  ![image-20230721162837526](C:\Users\ZYY\Desktop\cpplearn\github_code\project\cloud-disk\README.assets\image-20230721162837526.png)
+  ![image-20230721201354963](README.assets/image-20230721201354963.png)
 
 - nginx如何进行数据转发
 
@@ -395,7 +395,7 @@ http {
 
     2. 转发给fastcgi 
 
-       <img src="C:\Users\ZYY\Desktop\cpplearn\github_code\project\cloud-disk\README.assets\image-20230721163421090.png" alt="image-20230721163421090" style="zoom:67%;" />
+       ![image-20230721201400021](README.assets/image-20230721201400021.png)
 
 ### 3.fastcgi通信协议
 
@@ -403,11 +403,11 @@ http {
 - 定义统一结构消息，用来读取每个消息的消息体，方便切割
 - 类型
 
-<img src="C:\Users\ZYY\Desktop\cpplearn\github_code\project\cloud-disk\README.assets\image-20230721164413605.png" alt="image-20230721164413605" style="zoom: 67%;" />
+![image-20230721201406004](README.assets/image-20230721201406004.png)
 
 - 传递过程
 
-  <img src="C:\Users\ZYY\Desktop\cpplearn\github_code\project\cloud-disk\README.assets\image-20230721164518967.png" alt="image-20230721164518967" style="zoom:67%;" />
+  ![image-20230721201421475](README.assets/image-20230721201421475.png)
 
 - 数据包格式
   - 头部+包体
@@ -428,7 +428,7 @@ http {
 
   - 直接由Nginx将HTTP协议转换为Fastcgi协议传输给fastCGI进程处理
 
-    <img src="C:\Users\ZYY\Desktop\cpplearn\github_code\project\cloud-disk\README.assets\image-20230721165235969.png" alt="image-20230721165235969" style="zoom:50%;" />
+    ![image-20230721201439835](README.assets/image-20230721201439835.png)
 
 - 安装
 
@@ -447,14 +447,14 @@ http {
   - 安装完成之后，spawn-fcgi程序被安装在了/usr/local/bin/目录下
 
 - 编程演示
-  - ![image-20230721165551402](C:\Users\ZYY\Desktop\cpplearn\github_code\project\cloud-disk\README.assets\image-20230721165551402.png)
+  - ![image-20230721201450427](README.assets/image-20230721201450427.png)
 
 - 参考https://dongshao.blog.csdn.net/article/details/106321820
 
 - ### 修改Nginx配置文件
 
   - `sudo vim /usr/local/nginx/conf/nginx.conf`
-  - <img src="C:\Users\ZYY\Desktop\cpplearn\github_code\project\cloud-disk\README.assets\image-20230721193727255.png" alt="image-20230721193727255" style="zoom:50%;" />
+  - ![image-20230721201502184](README.assets/image-20230721201502184.png)
 
 ------
 
@@ -493,7 +493,7 @@ http {
 
   
 
-<img src="C:\Users\ZYY\Desktop\cpplearn\github_code\project\cloud-disk\README.assets\image-20230721171121525.png" alt="image-20230721171121525" style="zoom:67%;" />
+![image-20230721201509732](README.assets/image-20230721201509732.png)
 
 ### 3. FastDFS集群搭建
 
@@ -527,7 +527,7 @@ mkdir  storage
 sudo vim /etc/fdfs/storage.conf
 ```
 
-![image-20230721171700933](C:\Users\ZYY\Desktop\cpplearn\github_code\project\cloud-disk\README.assets\image-20230721171700933.png)
+![](README.assets/image-20230721201516023.png)
 
 ```shell
 启动storage节点，并查看是否启动成功：
@@ -543,7 +543,7 @@ sudo vim /etc/fdfs/client.conf
 
 ```
 
-<img src="C:\Users\ZYY\Desktop\cpplearn\github_code\project\cloud-disk\README.assets\image-20230721171829878.png" alt="image-20230721171829878" style="zoom:67%;" />
+![image-20230721201530494](README.assets/image-20230721201530494.png)
 
 ```shell
 检测集群状态
@@ -554,13 +554,13 @@ fdfs_monitor /etc/fdfs/client.conf
 
 - 将fastdfds-nginx-module模块源码包中的**src目录下的mod_fastdfs.conf文件拷贝一份到/etc/fdfs目录下。**
 
-![image-20230721193411165](C:\Users\ZYY\Desktop\cpplearn\github_code\project\cloud-disk\README.assets\image-20230721193411165.png)<img src="C:\Users\ZYY\Desktop\cpplearn\github_code\project\cloud-disk\README.assets\image-20230721193427827.png" alt="image-20230721193427827" style="zoom:67%;" /><img src="C:\Users\ZYY\Desktop\cpplearn\github_code\project\cloud-disk\README.assets\image-20230721193443088.png" alt="image-20230721193443088" style="zoom:67%;" />
+![image-20230721201542772](README.assets/image-20230721201542772.png)![image-20230721201551386](README.assets/image-20230721201551386.png)![image-20230721201557932](README.assets/image-20230721201557932.png)
 
 - **将fastdfs源码目录conf/目录下的http.conf、mime.types**也复制到/etc/fdfs/目录下。
 
 - ### 修改Nginx配置文件
 
-  - <img src="C:\Users\ZYY\Desktop\cpplearn\github_code\project\cloud-disk\README.assets\image-20230721193607380.png" alt="image-20230721193607380" style="zoom:67%;" />
+  - ![image-20230721201605994](README.assets/image-20230721201605994.png)
 
 ## 5.Redis
 
@@ -586,7 +586,7 @@ fdfs_monitor /etc/fdfs/client.conf
 
     参看https://blog.csdn.net/qq_41453285/article/details/106355155
 
-<img src="C:\Users\ZYY\Desktop\cpplearn\github_code\project\cloud-disk\README.assets\image-20230721173026755.png" alt="image-20230721173026755" style="zoom:80%;" />
+<img src="README.assets/image-20230721201612762.png" alt="image-20230721201612762" style="zoom:67%;" />
 
 ## 6. MySQL
 
@@ -671,10 +671,10 @@ fdfs_monitor /etc/fdfs/client.conf
 
   
 
-<img src="C:\Users\ZYY\Desktop\cpplearn\github_code\project\cloud-disk\README.assets\image-20230721194043528.png" alt="image-20230721194043528" style="zoom:67%;" />
+![image-20230721201624828](README.assets/image-20230721201624828.png)
 
 ## 7. 功能阐述
 
 ### 1. 文件上传的代码流程
 
-![在这里插入图片描述](https://img-blog.csdnimg.cn/20200216215121572.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NDgxNjczMg==,size_16,color_FFFFFF,t_70)
+![image-20230721201638040](README.assets/image-20230721201638040.png)
