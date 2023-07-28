@@ -149,7 +149,7 @@ sudo nginx -t
 ps aux | grep nginx
 ```
 
-![image-20230721200645480](README.assets/image-20230721200645480.png)
+![image-20230721200645480](./README.assets/image-20230721200645480-1690533939210-1.png)
 
 - 配置文件 nginx.conf
 
