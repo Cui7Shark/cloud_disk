@@ -864,9 +864,9 @@ void Login::on_register_btn_clicked()
 >
 > 在Nginx中安装了 openssl 插件 用于进行MD5加密
 
-![image-20230726213206684](云盘笔记.assets/image-20230726213206684.png)
+![image-20230726213206684](./README.assets/image-20230726213206684.png)
 
-![image-20230726213544307](云盘笔记.assets/image-20230726213544307.png)
+![image-20230726213544307](./README.assets/image-20230726213544307.png)
 
 ------
 
@@ -878,11 +878,11 @@ void Login::on_register_btn_clicked()
 - /myfile？cmd=count URL : 登录成功后，Qt客户端再发送一个请求获得自己的文件数量
 - /myfile？cmd=normal：获取文件
 
-![image-20230728102524983](云盘笔记.assets/image-20230728102524983.png)
+![image-20230728102524983](./README.assets/image-20230728102524983.png)
 
 服务器会给客户端发送HTTP响应报文：
 
-![image-20230728102505678](云盘笔记.assets/image-20230728102505678.png)
+![image-20230728102505678](./README.assets/image-20230728102505678.png)
 
 - 服务器生成token令牌，存在Redis，还发给客户端，以后客户端再发送请求时，就在报文主体里只加上token，和用户名，这样服务器可以和自己保存的token比较。不用每次都去验证各种信息，节省HTTP传输资源。
 
@@ -890,7 +890,7 @@ void Login::on_register_btn_clicked()
 
 - Qt客户端通过发送一个HTTP请求给Nginx（URL以login结尾），Nginx接收到这个请求将请求传递给FastCGI，FastCGI通过自己一些内置的环境变量获取到URL和报文主体进行解析。
 
-![image-20230728103336118](云盘笔记.assets/image-20230728103336118.png)
+![image-20230728103336118](./README.assets/image-20230728103336118.png)
 
 #### Qt客户端代码解析
 
@@ -929,7 +929,7 @@ void Login::on_register_btn_clicked()
 >
 >Base64要求把每三个8bit的字节转换成四个6bit的字节（4*6 = 24）再把6bit的高位添2个0，组成四个8bit的字节。
 >
->![image-20230728161001926](云盘笔记.assets/image-20230728161001926.png)
+>![image-20230728161001926](./README.assets/image-20230728161001926.png)
 
 ### 4. 上传文件
 
@@ -952,4 +952,4 @@ HTTP响应报文主体：
 | :--: | :----: | :------------------------: |
 | code | 结果集 | 008 ：上传失败   009：成功 |
 
-![image-20230728162651560](云盘笔记.assets/image-20230728162651560.png)
+![image-20230728162651560](./README.assets/image-20230728162651560.png)
