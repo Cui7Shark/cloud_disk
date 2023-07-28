@@ -1,6 +1,8 @@
 # cloud_disk
 
-> 云盘项目
+> 云盘项目: https://github.com/Cui7Shark/cloud_disk
+>
+> 笔记作者: 七海big_shark (鹏)
 
 ## 1. 项目总体架构
 
@@ -673,8 +675,281 @@ fdfs_monitor /etc/fdfs/client.conf
 
 ![image-20230721201624828](README.assets/image-20230721201624828.png)
 
+------
+
+
+
 ## 7. 功能阐述
 
-### 1. 文件上传的代码流程
+### 1.文件上传的代码流程
 
-![image-20230721201638040](README.assets/image-20230721201638040.png)
+![image-20230721201638040](README.assets/image-20230721201638040.png) 
+
+------
+
+
+
+### 2. 注册功能的实现
+
+#### 业务流程：
+
+- Qt客户端发送HTTP请求给Nginx， Nginx接收到请求后将请求转发给FastCGI， FastCGI通过自己的一些内置的环境变量获取到URL和报文主体进行解析。分析数据，提取数据，MySQL保存用户注册信息。服务器回复json格式响应报文。
+- 客户端发送的HTTP请求字段：
+  - URL 
+  - 请求方式：POST
+  - HTTP版本：1.1
+  - Content-Type : application/json
+- 请求主体：
+  - 用户名
+  - 密码
+  - 昵称
+  - 手机号
+  - 邮箱
+- HTTP响应报文主体：code 结果值 002成功 003用户存在 004失败
+
+#### QT客户端代码解析 -- 注册流程
+
+1. 用户输入信息 抽取输入数据QString类型
+2. 进行数据校验,判读输入的格式是否正确, 使用QRegExp类
+3. 调用setRegisterJson()函数将输入转换为JSON格式 (作为请求报文主体)
+   - 里面使用了QMap数据类型,形成K-V键值对. `QMap<QString, QVariant>`
+   - 然后将QMap类型转换为QJsonDocument类  调用`QJsonDocument::fromVariant()` 类成员函数.
+4. 开始构造连接服务器的URL和请求报文 `QString url` ; 将报文头和主体发送出去 `QNetworkRequset request`  , `request.seturl(QUrl(url));`
+5. 等待服务器回传的消息 JSON格式, 解析code字符串,做判断.
+
+```c++
+//----QT端---
+// 用户注册操作
+void Login::on_register_btn_clicked()
+{
+    // 从控件中取出用户输入的数据 QString类型
+    QString userName = ui->reg_usr->text();
+    QString nickName = ui->reg_nickname->text();
+    QString firstPwd = ui->reg_pwd->text();
+    QString surePwd = ui->reg_surepwd->text();
+    QString phone = ui->reg_phone->text();
+    QString email = ui->reg_mail->text();
+
+
+    // 数据校验
+    QRegExp regexp(USER_REG);
+    if(!regexp.exactMatch(userName))
+    {
+        QMessageBox::warning(this, "警告", "用户名格式不正确");
+        ui->reg_usr->clear();
+        ui->reg_usr->setFocus();
+        return;
+    }
+    if(!regexp.exactMatch(nickName))
+    {
+        QMessageBox::warning(this, "警告", "昵称格式不正确");
+        ui->reg_nickname->clear();
+        ui->reg_nickname->setFocus();
+        return;
+    }
+    regexp.setPattern(PASSWD_REG);
+    if(!regexp.exactMatch(firstPwd))
+    {
+        QMessageBox::warning(this, "警告", "密码格式不正确");
+        ui->reg_pwd->clear();
+        ui->reg_pwd->setFocus();
+        return;
+    }
+    if(surePwd != firstPwd)
+    {
+        QMessageBox::warning(this, "警告", "两次输入的密码不匹配, 请重新输入");
+        ui->reg_surepwd->clear();
+        ui->reg_surepwd->setFocus();
+        return;
+    }
+    regexp.setPattern(PHONE_REG);
+    if(!regexp.exactMatch(phone))
+    {
+        QMessageBox::warning(this, "警告", "手机号码格式不正确");
+        ui->reg_phone->clear();
+        ui->reg_phone->setFocus();
+        return;
+    }
+    regexp.setPattern(EMAIL_REG);
+    if(!regexp.exactMatch(email))
+    {
+        QMessageBox::warning(this, "警告", "邮箱码格式不正确");
+        ui->reg_mail->clear();
+        ui->reg_mail->setFocus();
+        return;
+    }
+
+    // 将注册信息打包为json格式
+    QByteArray array = setRegisterJson(userName, nickName, m_cm.getStrMd5(firstPwd), phone, email);
+    qDebug() << "register json data" << array;
+    // 设置连接服务器要发送的url
+    QNetworkRequest request;
+    QString url = QString("http://%1:%2/reg").arg(ui->address_server->text()).arg(ui->port_server->text());
+
+    qDebug() << "url:" << url;
+
+    request.setUrl(QUrl(url));
+    // 设置请求头
+    request.setHeader(QNetworkRequest::ContentTypeHeader, QVariant("application/json"));
+    request.setHeader(QNetworkRequest::ContentLengthHeader, QVariant(array.size()));
+    // 发送数据
+    QNetworkReply* reply = m_manager->post(request, array);
+
+    // 判断请求是否被成功处理
+    connect(reply, &QNetworkReply::readyRead, [=]()
+    {
+        // 读sever回写的数据
+        QByteArray jsonData = reply->readAll();
+        /*
+        注册 - server端返回的json格式数据：
+            成功:         {"code":"002"}
+            该用户已存在：  {"code":"003"}
+            失败:         {"code":"004"}
+        */
+        // 判断状态码
+        if("002" == m_cm.getCode(jsonData))
+        {
+            //注册成功
+            QMessageBox::information(this, "注册成功", "注册成功，请登录");
+
+            //清空行编辑内容
+            ui->reg_usr->clear();
+            ui->reg_nickname->clear();
+            ui->reg_pwd->clear();
+            ui->reg_surepwd->clear();
+            ui->reg_phone->clear();
+            ui->reg_mail->clear();
+
+            //设置登陆窗口的登陆信息
+            ui->log_usr->setText(userName);
+            ui->log_pwd->setText(firstPwd);
+            ui->rember_pwd->setChecked(true);
+
+            //切换到登录界面
+            ui->stackedWidget->setCurrentWidget(ui->login_page);
+        }
+        else if("003" == m_cm.getCode(jsonData))
+        {
+            QMessageBox::warning(this, "注册失败", QString("[%1]该用户已经存在!!!").arg(userName));
+        }
+        else if("004" == m_cm.getCode(jsonData))
+        {
+            QMessageBox::warning(this, "注册失败", "注册失败！！！");
+        }
+        // 释放资源
+        delete reply;
+    });
+}
+```
+
+#### 服务器端代码解析 -- 注册流程
+
+1. 服务器端: Nginx + fastCGI处理
+2. 在Nginx配置文件中设置注册/reg的转发端口10001, 请求会转发给FastCGI. (fcgi.sh 脚本中会设置端口 对应 ./bin_cgi/register 程序的地址) 
+3. **查看reg_cgi.c的main函数**
+   1. 使用“CONTENT_LENGTH”环境变量获取请求报文主体. 若为空就报错
+   2. 若请求报文有内容, 就调用fread()从Nginx中读取HTTP请求报文的所有内容(从输入缓冲读取I/O函数缓冲 or 套接字缓冲,buf)，然后调用user_register()函数在服务端注册该用户。
+   3. 获取MySQL数据库的IP,端口
+   4. `get_reg_info()` : 调用JSON的C API提取JSON数据, 获取用户名等信息.
+   5. 连接MySQL
+   6. 若用户不存在, 构造SQL语句, 将用户数据插入到`user_info` 表中.
+   7. 若注册成功, 构造字符串out , 然后将字符串构造为JSON格式 
+   8. out返回给Nginx. Nginx返回给客户端
+
+> 用户密码加密 -- MD5加密 
+>
+> MD5: 信息-摘要算法 5 , 确保信息传输完整一致. 又叫哈希算法.
+>
+> MD5 不可逆, 本意用来校验数据的完整性, 用于明文密码加密
+>
+> 在Nginx中安装了 openssl 插件 用于进行MD5加密
+
+![image-20230726213206684](云盘笔记.assets/image-20230726213206684.png)
+
+![image-20230726213544307](云盘笔记.assets/image-20230726213544307.png)
+
+------
+
+###  3.登录功能的实现
+
+登录的时候会发送3个URL请求报文给服务器端
+
+- /login URL ： 判断用户账号和密码是否正确
+- /myfile？cmd=count URL : 登录成功后，Qt客户端再发送一个请求获得自己的文件数量
+- /myfile？cmd=normal：获取文件
+
+![image-20230728102524983](云盘笔记.assets/image-20230728102524983.png)
+
+服务器会给客户端发送HTTP响应报文：
+
+![image-20230728102505678](云盘笔记.assets/image-20230728102505678.png)
+
+- 服务器生成token令牌，存在Redis，还发给客户端，以后客户端再发送请求时，就在报文主体里只加上token，和用户名，这样服务器可以和自己保存的token比较。不用每次都去验证各种信息，节省HTTP传输资源。
+
+#### 登录业务流程：
+
+- Qt客户端通过发送一个HTTP请求给Nginx（URL以login结尾），Nginx接收到这个请求将请求传递给FastCGI，FastCGI通过自己一些内置的环境变量获取到URL和报文主体进行解析。
+
+![image-20230728103336118](云盘笔记.assets/image-20230728103336118.png)
+
+#### Qt客户端代码解析
+
+1. 从文本框中获取用户名、密码、服务器端地址
+2. 判断用户信息的格式是否正确
+3. 把登录信息加密，设置URL 发送给服务器端
+4. 等待服务器响应，code ：000 成功，
+5. 获取用户文件列表 会调用refreshFiles()函数
+6. refreshFiles()函数构造一个/myfiles?cmd=count URL给服务端，来获得自己在服务端拥有的文件数量
+7. 获得自己的文件数量之后，调用getUserFilesList()函数获得文件的所有内容
+
+#### 服务器端代码解析
+
+1. 服务器接收到登录和获取文件的请求URL后，会调用两个FastCGI （在Nginx配置文件里用location 声明），在启动FastCGI时会在脚本里设置端口转到的cgi程序。
+2. 没有请求就阻塞，通过`CONTENT_LENGTH` 环境变量来获取HTTP请求主体是否有内容，有内容才进一步分析。
+3. 调用fread（）从Nginx读取读取数据，从标准输入(web服务器)读取内容, 读取的就是用户的登录信息。调用get_login_info()函数获取登录用户的用户名和密码。再调用check_user_pwd() 从MySQL判断这个用户的相关信息是否正确。
+4. 如果登录信息正确。调用set_token()给这个客户端随机生成一个token保存在redis中，然后调用return_login_status()给前端返回数据。
+5. 当服务器发现客户端发来的URL以myfiles结尾，会调用myfiles_cgi.c程序，处理文件。
+
+>token验证：
+>
+>token：令牌， 本质是HTTP session，是用户自定义的任意字符串，只有客户端和服务器知道，成为两者之间的密钥，让服务器确认对方身份。
+>
+>流程：
+>
+>1. 客户端首次登录
+>2. 服务器验证用户名和密码
+>3. 成功后，服务器生成token，可以存储在内存、磁盘、数据库，把token发给客户端
+>4. 客户端收到token存起来，放在cookie，本地存储
+>5. 客户端每次向服务端请求时，在报文主体加入token
+>6. 服务器收到请求，去验证token。
+>
+>Base64 ：
+>
+>它是一种用64个字符来表示任意二进制数据的方法，常用在URL、Cookie、网页中传输少量二进制数据。
+>
+>Base64要求把每三个8bit的字节转换成四个6bit的字节（4*6 = 24）再把6bit的高位添2个0，组成四个8bit的字节。
+>
+>![image-20230728161001926](云盘笔记.assets/image-20230728161001926.png)
+
+### 4. 上传文件
+
+HTTP请求字段：
+
+- URL：http://xxx.xxx.xxx.xxx/upload
+- 请求方式：POST
+- HTTP版本：1.1
+- Content-Type ：application/octet-stream
+
+HTTP请求主体：
+
+| 参数名 | 含义 |     规则      |
+| :----: | ---- | :-----------: |
+| token  | 密码 | md5加密后的值 |
+
+HTTP响应报文主体：
+
+| 参数 |  含义  |            规则            |
+| :--: | :----: | :------------------------: |
+| code | 结果集 | 008 ：上传失败   009：成功 |
+
+![image-20230728162651560](云盘笔记.assets/image-20230728162651560.png)
